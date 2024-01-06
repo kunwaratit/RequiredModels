@@ -1,3 +1,5 @@
+for every new feature we work we create branches and later merge to main
+
 git checkout -b <<branchname>>      =>make branch 
 -->git branch                          =>show branch
 
