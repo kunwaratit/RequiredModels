@@ -1,0 +1,34 @@
+git checkout -b <<branchname>>      =>make branch 
+-->git branch                          =>show branch
+
+
+
+
+push garna 
+-->git checkout <<branchname>>	    =>switch to branchname
+-->git status
+-->git add .
+-->git status
+-->git commit -m "message"	
+--->git push origin <<branchname>>		
+
+
+pull garna
+
+git pull origin master/main	    =>pull from master to branchname you are in
+
+
+
+
+
+
+
+merge
+
+git merge <<branchname>>	    =>Merge the branchname to master sitting on main/master 
+git pull origin master/main	    =>pull from master to branchname you are in
+-->git status
+-->git add .
+-->git commit -m "message"	
+--->git push origin <<branchname>>		    
+git commit -a -m "message"	    =>add and commit
