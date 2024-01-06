@@ -1,6 +1,6 @@
 import os
 
-directory_path = r'u:\Atit\Coding\AI\CustomData\Machinemodels\RequiredModels\test sample jpeg'
+directory_path = r'u:\Atit\Coding\AI\CustomData\Machinemodels\RequiredModels\Images'
 
 if not os.path.exists(directory_path):
     print(f"Directory '{directory_path}' does not exist.")
@@ -13,7 +13,7 @@ file_list.sort()
 num_images = len(file_list)
 
 # rename
-for count, old_name in enumerate(file_list, start=1):
+for count, old_name in enumerate(file_list, start=90):
 
     new_name = f"{count}"
     new_path = os.path.join(directory_path, f"{new_name}.jpg")
