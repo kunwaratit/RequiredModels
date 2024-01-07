@@ -65,11 +65,8 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
 
     # Update positions of right lane cars
     for car in right_lane_cars:
-        if traffic_light_state == RED_STATE and car[0] + CAR_RADIUS > WIDTH // 2 - ROAD_WIDTH // 2:
-            car[0] = WIDTH // 2 - ROAD_WIDTH // 2 - CAR_RADIUS
-        else:
-            car[0] -= CAR_SPEED  # Move horizontally
-            car[1] = HEIGHT // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust y-coordinate to stay inside the road
+        car[0] -= CAR_SPEED  # Move horizontally
+        car[1] = HEIGHT // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust y-coordinate to stay inside the road
 
     # Update positions of top lane cars
     for car in top_lane_cars:
