@@ -1,30 +1,75 @@
 import pygame
 import random
-from constants import *
 
-FPS = 30
-
-# Define traffic light states
+# Constants
+WIDTH = 800
+HEIGHT = 600
+ROAD_WIDTH = 100
+CAR_RADIUS = 10
+CAR_SPEED = 5
+MAX_LEFT_LANE_CARS = 5
+MAX_RIGHT_LANE_CARS = 5
+MAX_TOP_LANE_CARS = 5
+MAX_BOTTOM_LANE_CARS = 5
+CAR_DELAY = 100
 GREEN_STATE = 0
 YELLOW_STATE = 1
 RED_STATE = 2
+FPS = 60
+GRAY = (169, 169, 169)
+WHITE = (255, 255, 255)
+BROWN = (139, 69, 19)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
 
 def handle_events():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             return False
     return True
+def check_min_distance(new_car, existing_cars):
+    min_distance = CAR_RADIUS * 4  # Minimum distance of half the radius
 
-def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars, left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter, traffic_light_state):
+    for car in existing_cars:
+        distance = ((new_car[0] - car[0]) ** 2 + (new_car[1] - car[1]) ** 2) ** 0.5
+        if distance < min_distance:
+            return False
+    return True
+
+def spawn_car(lane_cars, spawn_position):
+    new_car = spawn_position
+    while not check_min_distance(new_car, lane_cars):
+        # Adjust x or y coordinate until the minimum distance is satisfied
+        new_car[0] += random.choice([-1, 1]) * CAR_SPEED
+        new_car[1] += random.choice([-1, 1]) * CAR_SPEED
+
+    lane_cars.append(new_car)
+def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars,
+                       left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter,
+                       traffic_light_state):
+    def check_min_distance(new_car, existing_cars):
+        min_distance = CAR_RADIUS * 4  # Minimum distance of half the radius
+
+        for car in existing_cars:
+            distance = ((new_car[0] - car[0]) ** 2 + (new_car[1] - car[1]) ** 2) ** 0.5
+            if distance < min_distance:
+                return False
+        return True
+
+
     # Update positions of left lane cars
     for car in left_lane_cars:
-        car[0] += CAR_SPEED  # Move horizontally
+        car[0] += CAR_SPEED
         car[1] = HEIGHT // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust y-coordinate to stay inside the road
 
     # Update positions of right lane cars
     for car in right_lane_cars:
-        car[0] -= CAR_SPEED  # Move horizontally
-        car[1] = HEIGHT // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust y-coordinate to stay inside the road
+        if traffic_light_state == RED_STATE and car[0] + CAR_RADIUS > WIDTH // 2 - ROAD_WIDTH // 2:
+            car[0] = WIDTH // 2 - ROAD_WIDTH // 2 - CAR_RADIUS
+        else:
+            car[0] -= CAR_SPEED  # Move horizontally
+            car[1] = HEIGHT // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust y-coordinate to stay inside the road
 
     # Update positions of top lane cars
     for car in top_lane_cars:
@@ -43,26 +88,20 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
     bottom_lane_cars[:] = [car for car in bottom_lane_cars if car[1] > 0]
 
     # Count the number of cars entering the left lane
-    if random.randint(1, CAR_DELAY) == 1 and len(left_lane_cars) < MAX_LEFT_LANE_CARS and traffic_light_state == GREEN_STATE:
-        # Spawn at the previous place but along the inside of the road
-        left_lane_cars.append([-CAR_RADIUS, HEIGHT // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2])
-        left_lane_counter += 1
+    if random.random() < 0.02 and len(left_lane_cars) < MAX_LEFT_LANE_CARS:
+        spawn_car(left_lane_cars, [0, HEIGHT // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2])
 
-    # Spawn new cars for the right lane
-    if random.randint(1, CAR_DELAY) == 1 and len(right_lane_cars) < MAX_RIGHT_LANE_CARS:
-        # Spawn at the previous place but along the inside of the road
-        right_lane_cars.append([WIDTH, HEIGHT // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2])
-        right_lane_counter += 1
+    # Spawn cars in right lane
+    if random.random() < 0.02 and len(right_lane_cars) < MAX_RIGHT_LANE_CARS:
+        spawn_car(right_lane_cars, [WIDTH, HEIGHT // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2])
 
-    # Count the number of cars entering the top lane
-    if random.randint(1, CAR_DELAY) == 1 and len(top_lane_cars) < MAX_TOP_LANE_CARS and traffic_light_state == GREEN_STATE:
-        top_lane_cars.append([WIDTH // 2 - CAR_RADIUS // 2, -CAR_RADIUS])
-        top_lane_counter += 1
+    # Spawn cars in top lane
+    if random.random() < 0.02 and len(top_lane_cars) < MAX_TOP_LANE_CARS:
+        spawn_car(top_lane_cars, [WIDTH // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2, 0])
 
-    # Spawn new cars for the bottom lane
-    if random.randint(1, CAR_DELAY) == 1 and len(bottom_lane_cars) < MAX_BOTTOM_LANE_CARS:
-        bottom_lane_cars.append([WIDTH // 2 - CAR_RADIUS // 2, HEIGHT])
-        bottom_lane_counter += 1
+    # Spawn cars in bottom lane
+    if random.random() < 0.02 and len(bottom_lane_cars) < MAX_BOTTOM_LANE_CARS:
+        spawn_car(bottom_lane_cars, [WIDTH // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2, HEIGHT])
 
     return left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter
 
@@ -84,37 +123,17 @@ def draw_on_screen(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_c
     pygame.draw.rect(screen, GRAY, (WIDTH - ROAD_WIDTH, HEIGHT // 2 - ROAD_WIDTH // 2, ROAD_WIDTH, ROAD_WIDTH))  # Right
 
     # Draw lines before every intersection with traffic light logic
-  # Draw lines before every intersection with traffic light logic
-    # Draw lines before every intersection with traffic light logic
-   # Draw lines before every intersection with traffic light logic
-# Draw lines before every intersection with traffic light logic
-    # Define durations for green and red lights in seconds
-    green_duration = 10
-    red_duration = 10
-    yellow_duration = 4
-
-    # Define the start and end times for each light phase
-    green_start = 0
-    green_end = green_start + green_duration
-
-    yellow_start = green_end
-    yellow_end = yellow_start + yellow_duration
-
-    red_start = yellow_end
-    red_end = red_start + red_duration
-
-    # Draw lines before every intersection with traffic light logic
-    if green_start * FPS <= traffic_light_timer < green_end * FPS:
+    if traffic_light_state == GREEN_STATE:
         pygame.draw.line(screen, GREEN, (WIDTH // 2 - ROAD_WIDTH // 2 - 10, 250), (WIDTH // 2 - ROAD_WIDTH // 2 - 10, HEIGHT - 300), 5)  # Left intersection line
         pygame.draw.line(screen, GREEN, (WIDTH // 2 + ROAD_WIDTH // 2 + 10, 300), (WIDTH // 2 + ROAD_WIDTH // 2 + 10, HEIGHT - 250), 5)  # Right intersection line
         pygame.draw.line(screen, RED, (400, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), (450, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), 5)  # Top intersection line
         pygame.draw.line(screen, RED, (350, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), (400, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), 5)  # Bottom intersection line
-    elif yellow_start * FPS <= traffic_light_timer < yellow_end * FPS:
+    elif traffic_light_state == YELLOW_STATE:
         pygame.draw.line(screen, YELLOW, (WIDTH // 2 - ROAD_WIDTH // 2 - 10, 250), (WIDTH // 2 - ROAD_WIDTH // 2 - 10, HEIGHT - 300), 5)  # Left intersection line
         pygame.draw.line(screen, YELLOW, (WIDTH // 2 + ROAD_WIDTH // 2 + 10, 300), (WIDTH // 2 + ROAD_WIDTH // 2 + 10, HEIGHT - 250), 5)  # Right intersection line
         pygame.draw.line(screen, YELLOW, (400, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), (450, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), 5)  # Top intersection line
         pygame.draw.line(screen, YELLOW, (350, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), (400, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), 5)  # Bottom intersection line
-    elif red_start * FPS <= traffic_light_timer < red_end * FPS:
+    elif traffic_light_state == RED_STATE:
         pygame.draw.line(screen, RED, (WIDTH // 2 - ROAD_WIDTH // 2 - 10, 250), (WIDTH // 2 - ROAD_WIDTH // 2 - 10, HEIGHT - 300), 5)  # Left intersection line
         pygame.draw.line(screen, RED, (WIDTH // 2 + ROAD_WIDTH // 2 + 10, 300), (WIDTH // 2 + ROAD_WIDTH // 2 + 10, HEIGHT - 250), 5)  # Right intersection line
         pygame.draw.line(screen, GREEN, (400, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), (450, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), 5)  # Top intersection line
@@ -181,10 +200,8 @@ while running:
 
     running = handle_events()
 
-    # Update traffic light timer
     traffic_light_timer = (traffic_light_timer + 1) % (FPS * 25)  # 25 seconds cycle (green: 10s, yellow: 5s, red: 10s)
 
-    # Update traffic light state
     if 0 <= traffic_light_timer < 10 * FPS:
         traffic_light_state = GREEN_STATE
     elif 10 * FPS <= traffic_light_timer < 15 * FPS:
@@ -192,13 +209,11 @@ while running:
     elif 15 * FPS <= traffic_light_timer < 25 * FPS:
         traffic_light_state = RED_STATE
 
-    # Update game logic based on traffic light timer and state
     left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter = update_game_logic(
         left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars,
         left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter, traffic_light_state
     )
 
-    # Draw the scene
     draw_on_screen(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars,
                    left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter,
                    traffic_light_timer)
