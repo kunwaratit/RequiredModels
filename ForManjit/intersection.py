@@ -88,7 +88,7 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
             car[0] = WIDTH // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust x-coordinate to stay inside the road
         elif traffic_light_state_vertical == GREEN_STATE:
             # If the light is green, allow the car to move freely
-            car[1] -= CAR_SPEED  # Move vertically
+            car[1] += CAR_SPEED  # Move vertically
             car[0] = WIDTH // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust x-coordinate to stay inside the road
 
     # Update positions of bottom lane cars
