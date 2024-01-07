@@ -79,26 +79,32 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
     # Update positions of top lane cars
     for car in top_lane_cars:
         if traffic_light_state_vertical == RED_STATE:
-            # Check the color of the top intersection line
-            if traffic_light_state_vertical == RED_STATE and car[1] < HEIGHT // 2 - ROAD_WIDTH // 2 + CAR_RADIUS:
+            # Check if the car has reached the top intersection line
+            if car[1] >= HEIGHT // 2 - ROAD_WIDTH // 2 - CAR_RADIUS:
                 # Stop the car (don't update y-coordinate)
-                car[0] = WIDTH // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2
-                continue
-
-        car[1] += CAR_SPEED  # Move vertically
-        car[0] = WIDTH // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust x-coordinate to stay inside the road
+                car[1] = HEIGHT // 2 - ROAD_WIDTH // 2 - CAR_RADIUS
+            else:
+                car[1] += CAR_SPEED  # Move vertically
+            car[0] = WIDTH // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust x-coordinate to stay inside the road
+        elif traffic_light_state_vertical == GREEN_STATE:
+            # If the light is green, allow the car to move freely
+            car[1] -= CAR_SPEED  # Move vertically
+            car[0] = WIDTH // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust x-coordinate to stay inside the road
 
     # Update positions of bottom lane cars
     for car in bottom_lane_cars:
         if traffic_light_state_vertical == RED_STATE:
-            # Check the color of the bottom intersection line
-            if traffic_light_state_vertical == RED_STATE and car[1] > HEIGHT // 2 + ROAD_WIDTH // 2 - CAR_RADIUS:
+            # Check if the car has reached the bottom intersection line
+            if car[1] <= HEIGHT // 2 + ROAD_WIDTH // 2 + CAR_RADIUS:
                 # Stop the car (don't update y-coordinate)
-                car[0] = WIDTH // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2
-                continue
-
-        car[1] -= CAR_SPEED  # Move vertically
-        car[0] = WIDTH // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust x-coordinate to stay inside the road
+                car[1] = HEIGHT // 2 + ROAD_WIDTH // 2 + CAR_RADIUS
+            else:
+                car[1] -= CAR_SPEED  # Move vertically
+            car[0] = WIDTH // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust x-coordinate to stay inside the road
+        elif traffic_light_state_vertical == GREEN_STATE:
+            # If the light is green, allow the car to move freely
+            car[1] -= CAR_SPEED  # Move vertically
+            car[0] = WIDTH // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust x-coordinate to stay inside the road
 
     # Remove cars that have moved out of the screen width or height
     left_lane_cars[:] = [car for car in left_lane_cars if car[0] < WIDTH]
