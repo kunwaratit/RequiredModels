@@ -52,9 +52,8 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
     
         # Update positions of left lane cars
     # Update positions of left lane cars
-   # Update positions of left lane cars
     for car in left_lane_cars:
-        if traffic_light_state_horizontal == RED_STATE:
+        if traffic_light_state == RED_STATE:
             # Check if the car is within 10 units of the red line
             if WIDTH // 2 - ROAD_WIDTH // 2 - 10 - CAR_RADIUS < car[0] < WIDTH // 2 - ROAD_WIDTH // 2 + CAR_RADIUS:
                 # Stop the car (don't update x-coordinate)
@@ -64,9 +63,10 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
         car[0] += CAR_SPEED  # Move horizontally
         car[1] = HEIGHT // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust y-coordinate to stay inside the road
 
+
     # Update positions of right lane cars
     for car in right_lane_cars:
-        if traffic_light_state_horizontal == RED_STATE:
+        if traffic_light_state == RED_STATE:
             # Check if the car is within 10 units of the red line
             if WIDTH // 2 + ROAD_WIDTH // 2 - CAR_RADIUS < car[0] < WIDTH // 2 + ROAD_WIDTH // 2 + 10 + CAR_RADIUS:
                 # Stop the car (don't update x-coordinate)
@@ -75,12 +75,11 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
 
         car[0] -= CAR_SPEED  # Move horizontally
         car[1] = HEIGHT // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust y-coordinate to stay inside the road
-
     # Update positions of top lane cars
     for car in top_lane_cars:
-        if traffic_light_state_vertical == RED_STATE:
+        if traffic_light_state == RED_STATE:
             # Check the color of the top intersection line
-            if traffic_light_state_vertical == RED_STATE and car[1] < HEIGHT // 2 - ROAD_WIDTH // 2 + CAR_RADIUS:
+            if traffic_light_state == RED_STATE and car[1] < HEIGHT // 2 - ROAD_WIDTH // 2 + CAR_RADIUS:
                 # Stop the car (don't update y-coordinate)
                 car[0] = WIDTH // 2 + ROAD_WIDTH // 4 - CAR_RADIUS // 2
                 continue
@@ -90,9 +89,9 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
 
     # Update positions of bottom lane cars
     for car in bottom_lane_cars:
-        if traffic_light_state_vertical == RED_STATE:
+        if traffic_light_state == RED_STATE:
             # Check the color of the bottom intersection line
-            if traffic_light_state_vertical == RED_STATE and car[1] > HEIGHT // 2 + ROAD_WIDTH // 2 - CAR_RADIUS:
+            if traffic_light_state == RED_STATE and car[1] > HEIGHT // 2 + ROAD_WIDTH // 2 - CAR_RADIUS:
                 # Stop the car (don't update y-coordinate)
                 car[0] = WIDTH // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2
                 continue
@@ -123,9 +122,7 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
 
     return left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter
 
-def draw_on_screen(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars,
-                   left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter,
-                   traffic_light_timer, traffic_light_state_vertical):
+def draw_on_screen(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars, left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter, traffic_light_timer):
     screen.fill(BROWN)
 
     # Draw roads
@@ -143,25 +140,21 @@ def draw_on_screen(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_c
     pygame.draw.rect(screen, GRAY, (WIDTH - ROAD_WIDTH, HEIGHT // 2 - ROAD_WIDTH // 2, ROAD_WIDTH, ROAD_WIDTH))  # Right
 
     # Draw lines before every intersection with traffic light logic
-    if traffic_light_state_horizontal == GREEN_STATE:
+    if traffic_light_state == GREEN_STATE:
         pygame.draw.line(screen, GREEN, (WIDTH // 2 - ROAD_WIDTH // 2 - 10, 250), (WIDTH // 2 - ROAD_WIDTH // 2 - 10, HEIGHT - 300), 5)  # Left intersection line
         pygame.draw.line(screen, GREEN, (WIDTH // 2 + ROAD_WIDTH // 2 + 10, 300), (WIDTH // 2 + ROAD_WIDTH // 2 + 10, HEIGHT - 250), 5)  # Right intersection line
-    elif traffic_light_state_horizontal == YELLOW_STATE:
-        pygame.draw.line(screen, YELLOW, (WIDTH // 2 - ROAD_WIDTH // 2 - 10, 250), (WIDTH // 2 - ROAD_WIDTH // 2 - 10, HEIGHT - 300), 5)  # Left intersection line
-        pygame.draw.line(screen, YELLOW, (WIDTH // 2 + ROAD_WIDTH // 2 + 10, 300), (WIDTH // 2 + ROAD_WIDTH // 2 + 10, HEIGHT - 250), 5)  # Right intersection line
-    elif traffic_light_state_horizontal == RED_STATE:
-        pygame.draw.line(screen, RED, (WIDTH // 2 - ROAD_WIDTH // 2 - 10, 250), (WIDTH // 2 - ROAD_WIDTH // 2 - 10, HEIGHT - 300), 5)  # Left intersection line
-        pygame.draw.line(screen, RED, (WIDTH // 2 + ROAD_WIDTH // 2 + 10, 300), (WIDTH // 2 + ROAD_WIDTH // 2 + 10, HEIGHT - 250), 5)  # Right intersection line
-    # Vertical traffic light logic
-    if traffic_light_state_vertical == GREEN_STATE:
-        pygame.draw.line(screen, GREEN, (400, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), (450, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), 5)  # Top intersection line
-        pygame.draw.line(screen, GREEN, (350, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), (400, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), 5)  # Bottom intersection line
-    elif traffic_light_state_vertical == YELLOW_STATE:
-        pygame.draw.line(screen, YELLOW, (400, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), (450, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), 5)  # Top intersection line
-        pygame.draw.line(screen, YELLOW, (350, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), (400, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), 5)  # Bottom intersection line
-    elif traffic_light_state_vertical == RED_STATE:
         pygame.draw.line(screen, RED, (400, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), (450, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), 5)  # Top intersection line
         pygame.draw.line(screen, RED, (350, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), (400, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), 5)  # Bottom intersection line
+    elif traffic_light_state == YELLOW_STATE:
+        pygame.draw.line(screen, YELLOW, (WIDTH // 2 - ROAD_WIDTH // 2 - 10, 250), (WIDTH // 2 - ROAD_WIDTH // 2 - 10, HEIGHT - 300), 5)  # Left intersection line
+        pygame.draw.line(screen, YELLOW, (WIDTH // 2 + ROAD_WIDTH // 2 + 10, 300), (WIDTH // 2 + ROAD_WIDTH // 2 + 10, HEIGHT - 250), 5)  # Right intersection line
+        pygame.draw.line(screen, YELLOW, (400, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), (450, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), 5)  # Top intersection line
+        pygame.draw.line(screen, YELLOW, (350, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), (400, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), 5)  # Bottom intersection line
+    elif traffic_light_state == RED_STATE:
+        pygame.draw.line(screen, RED, (WIDTH // 2 - ROAD_WIDTH // 2 - 10, 250), (WIDTH // 2 - ROAD_WIDTH // 2 - 10, HEIGHT - 300), 5)  # Left intersection line
+        pygame.draw.line(screen, RED, (WIDTH // 2 + ROAD_WIDTH // 2 + 10, 300), (WIDTH // 2 + ROAD_WIDTH // 2 + 10, HEIGHT - 250), 5)  # Right intersection line
+        pygame.draw.line(screen, GREEN, (400, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), (450, HEIGHT // 2 - ROAD_WIDTH // 2 - 10), 5)  # Top intersection line
+        pygame.draw.line(screen, GREEN, (350, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), (400, HEIGHT // 2 + ROAD_WIDTH // 2 + 10), 5)  # Bottom intersection line
 
     # Draw left lane cars
     for car in left_lane_cars:
@@ -215,9 +208,7 @@ top_lane_counter = 0
 right_lane_counter = 0
 bottom_lane_counter = 0
 
-traffic_light_state_horizontal = GREEN_STATE
-traffic_light_state_vertical = RED_STATE  # Initialize with a default state
-
+traffic_light_state = GREEN_STATE
 traffic_light_timer = 0
 running = True
 
@@ -227,24 +218,21 @@ while running:
     running = handle_events()
 
     traffic_light_timer = (traffic_light_timer + 1) % (FPS * 25)  # 25 seconds cycle (green: 10s, yellow: 5s, red: 10s)
+
     if 0 <= traffic_light_timer < 10 * FPS:
-        traffic_light_state_horizontal = GREEN_STATE
-        traffic_light_state_vertical = RED_STATE
+        traffic_light_state = GREEN_STATE
     elif 10 * FPS <= traffic_light_timer < 15 * FPS:
-        traffic_light_state_horizontal = YELLOW_STATE
-        traffic_light_state_vertical = RED_STATE
+        traffic_light_state = YELLOW_STATE
     elif 15 * FPS <= traffic_light_timer < 25 * FPS:
-        traffic_light_state_horizontal = RED_STATE
-        traffic_light_state_vertical = GREEN_STATE
+        traffic_light_state = RED_STATE
 
     left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter = update_game_logic(
         left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars,
-        left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter, traffic_light_state_horizontal
+        left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter, traffic_light_state
     )
 
     draw_on_screen(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars,
-                left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter,
-                traffic_light_timer, traffic_light_state_vertical)# Pass vertical state to the drawing function
-
+                   left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter,
+                   traffic_light_timer)
 
 pygame.quit()
