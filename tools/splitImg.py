@@ -51,7 +51,7 @@ def split_data(source_folder, destination_folder):
 
 if __name__ == "__main__":
 
-    Sample_Images= os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'SampleImages', 'images')
+    Sample_Images= os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'Data', 'images')
     Splited_Data = os.path.join(Sample_Images, '..')
     
     split_data(Sample_Images, Splited_Data)
