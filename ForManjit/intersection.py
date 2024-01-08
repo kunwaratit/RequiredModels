@@ -29,7 +29,7 @@ def handle_events():
             return False
     return True
 def check_min_distance(new_car, existing_cars):
-    min_distance = CAR_RADIUS * 4  # Minimum distance of half the radius
+    min_distance = CAR_RADIUS * 2  # Minimum distance of the diameter
 
     for car in existing_cars:
         distance = ((new_car[0] - car[0]) ** 2 + (new_car[1] - car[1]) ** 2) ** 0.5
@@ -43,7 +43,13 @@ def spawn_car(lane_cars, spawn_position):
         new_car[0] += random.choice([-1, 1]) * CAR_SPEED
         new_car[1] += random.choice([-1, 1]) * CAR_SPEED
 
+        # Ensure the new car stays within the road bounds
+        new_car[0] = max(CAR_RADIUS, min(WIDTH - CAR_RADIUS, new_car[0]))
+        new_car[1] = max(CAR_RADIUS, min(HEIGHT - CAR_RADIUS, new_car[1]))
+
     lane_cars.append(new_car)
+    
+
 def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars,
                        left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter,
                        traffic_light_state):
@@ -52,17 +58,22 @@ def update_game_logic(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lan
     
         # Update positions of left lane cars
     # Update positions of left lane cars
-   # Update positions of left lane cars
     for car in left_lane_cars:
-        if traffic_light_state_horizontal == RED_STATE:
-            # Check if the car is within 10 units of the red line
-            if WIDTH // 2 - ROAD_WIDTH // 2 - 10 - CAR_RADIUS < car[0] < WIDTH // 2 - ROAD_WIDTH // 2 + CAR_RADIUS:
-                # Stop the car (don't update x-coordinate)
+            if traffic_light_state_horizontal == RED_STATE and WIDTH // 2 - ROAD_WIDTH // 2 - 10 - CAR_RADIUS < car[0] < WIDTH // 2 - ROAD_WIDTH // 2 + CAR_RADIUS:
                 car[1] = HEIGHT // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2
                 continue
 
-        car[0] += CAR_SPEED  # Move horizontally
-        car[1] = HEIGHT // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2  # Adjust y-coordinate to stay inside the road
+            car[0] += CAR_SPEED
+            car[1] = HEIGHT // 2 - ROAD_WIDTH // 4 - CAR_RADIUS // 2
+
+            # Check for collisions with other cars
+            for other_car in left_lane_cars:
+                if other_car != car:
+                    distance = ((car[0] - other_car[0]) ** 2 + (car[1] - other_car[1]) ** 2) ** 0.5
+                    if distance < CAR_RADIUS * 2:
+                        # Collision detected, stop the car
+                        car[0] -= CAR_SPEED
+                        break
 
     # Update positions of right lane cars
     for car in right_lane_cars:
@@ -251,6 +262,4 @@ while running:
     draw_on_screen(left_lane_cars, right_lane_cars, top_lane_cars, bottom_lane_cars,
                 left_lane_counter, top_lane_counter, right_lane_counter, bottom_lane_counter,
                 traffic_light_timer, traffic_light_state_vertical)# Pass vertical state to the drawing function
-
-
 pygame.quit()
